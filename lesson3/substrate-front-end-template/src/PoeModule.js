@@ -13,6 +13,7 @@ function Main (props) {
   const [status, setStatus] = useState('');
   const [digest, setDigest] = useState('');
   const [owner, setOwner] = useState('');
+  const [dest, setDest] = useState('');
   const [blockNumber, setBlockNumber] = useState('');
 
   useEffect(() => {
@@ -36,6 +37,7 @@ function Main (props) {
         .join('');
 
       const hash = blake2AsHex(content, 256);
+      console.log(hash);
       setDigest(hash);
     };
     fileReader.readAsArrayBuffer(file);
@@ -80,10 +82,33 @@ function Main (props) {
               paramFields: [true]
             }}
           />
-
-          <div>{status}</div>
-          <div>{`Claim Owner: ${owner}, blockNumber: ${blockNumber}`}</div>
         </Form.Field>
+        <Form.Field>
+          <Input
+            fluid
+            label='To'
+            type='text'
+            placeholder='address'
+            state='addressTo'
+            onChange={ (_, data) => setDest(data.value) }
+          />
+        </Form.Field>
+        <Form.Field>
+          <TxButton
+            accountPair={accountPair}
+            label='Transfer Claim'
+            type='SIGNED-TX'
+            setStatus={setStatus}
+            attrs={{
+              palletRpc: 'poeModule',
+              callable: 'transferClaim',
+              inputParams: [digest, dest],
+              paramFields: [true]
+            }}
+          />
+        </Form.Field>
+        <div>{status}</div>
+        <div>{`Claim Owner: ${owner}, blockNumber: ${blockNumber}`}</div>
       </Form>
       {/* <Card centered>
         <Card.Content textAlign='center'>
