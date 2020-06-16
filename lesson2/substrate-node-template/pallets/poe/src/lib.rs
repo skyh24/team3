@@ -35,7 +35,9 @@ decl_event!(
 	pub enum Event<T> where AccountId = <T as system::Trait>::AccountId {
 		ClaimCreated(AccountId, Vec<u8>),
 		ClaimRevoked(AccountId, Vec<u8>),
-		ClaimTransfer(AccountId, Vec<u8>),
+
+		ClaimTransfered(AccountId, Vec<u8>),
+
 	}
 );
 
@@ -90,16 +92,21 @@ decl_module! {
 		}
 
 		#[weight = 0]
-		pub fn transfer_claim(origin, claim: Vec<u8>, reciver: <T as system::Trait>::AccountId) -> dispatch::DispatchResult {
+
+		pub fn transfer_claim(origin, claim: Vec<u8>, to: <T::Lookup as StaticLookup>::Source) -> dispatch::DispatchResult {
+
+
 			let sender = ensure_signed(origin)?;
 
 			ensure!(Proofs::<T>::contains_key(&claim), Error::<T>::ClaimNotExist);
 			let (owner, _block_number) = Proofs::<T>::get(&claim);
 
 			ensure!(owner == sender, Error::<T>::NotClaimOwner);
-			Proofs::<T>::insert(&claim, (reciver.clone(), system::Module::<T>::block_number()));
+			let to = T::Lookup::lookup(to)?;
+			Proofs::<T>::insert(&claim, (to.clone(), system::Module::<T>::block_number()));
 			
-			Self::deposit_event(RawEvent::ClaimTransfer(sender, claim));
+			Self::deposit_event(RawEvent::ClaimTransfered(sender, claim));
+
 			Ok(())
 		}
 
