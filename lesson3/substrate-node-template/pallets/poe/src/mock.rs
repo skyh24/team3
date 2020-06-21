@@ -55,7 +55,6 @@ parameter_types! {
 impl Trait for Test {
 	type Event = ();
 	type MaxClaimLength = MaxClaimLength;
-	type MaxMemoLength = MaxMemoLength;
 	type Currency = balances::Module<Test>;
 }
 pub type PoeModule = Module<Test>;

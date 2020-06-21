@@ -1,7 +1,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Encode, Decode};
-use frame_support::{decl_module, decl_storage, decl_error, ensure, StorageValue, StorageMap, traits::Randomness};
+use frame_support::{decl_module, decl_storage, decl_error, ensure, 
+		StorageValue, StorageMap, traits::Randomness};
 use sp_io::hashing::blake2_128;
 use frame_system::ensure_signed;
 use sp_runtime::{DispatchError, DispatchResult};
