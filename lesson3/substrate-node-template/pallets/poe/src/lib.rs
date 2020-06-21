@@ -43,12 +43,14 @@ decl_storage! {
 
 // The pallet's events
 decl_event!(
-	pub enum Event<T> where AccountId = <T as system::Trait>::AccountId {
+	pub enum Event<T> where 
+			AccountId = <T as system::Trait>::AccountId,
+			Balance = BalanceOf<T> {
 		ClaimCreated(AccountId, Vec<u8>),
 		ClaimRevoked(AccountId, Vec<u8>),
-		ClaimTransfered(AccountId, Vec<u8>, AccountId),
-		ClaimSale(AccountId, AccountId, Vec<u8>),
-
+		ClaimTransfered(AccountId, AccountId, Vec<u8>),
+		PriceSet(AccountId, Vec<u8>, Balance),
+		ClaimSale(AccountId, AccountId, Vec<u8>, Balance),
 	}
 );
 
@@ -118,12 +120,12 @@ decl_module! {
 			let dest = T::Lookup::lookup(dest)?;
 			Proofs::<T>::insert(&claim, (dest.clone(), system::Module::<T>::block_number()));
 
-			Self::deposit_event(RawEvent::ClaimTransfered(sender, claim, dest));
+			Self::deposit_event(RawEvent::ClaimTransfered(sender, dest, claim));
 			Ok(())
 		}
 
 		#[weight = 0]
-		pub fn set_claim_price(origin, claim: Vec<u8>, price: BalanceOf<T>) -> dispatch::DispatchResult {
+		pub fn set_price(origin, claim: Vec<u8>, price: BalanceOf<T>) -> dispatch::DispatchResult {
 			let sender = ensure_signed(origin)?;
 			ensure!(Proofs::<T>::contains_key(&claim), Error::<T>::ClaimNotExist);
 
@@ -131,7 +133,7 @@ decl_module! {
 			ensure!(owner == sender, Error::<T>::NotClaimOwner);
 
 			Price::<T>::insert(&claim, price);
-
+			Self::deposit_event(RawEvent::PriceSet(sender, claim, price));
 			Ok(())
 		}
 
@@ -153,7 +155,7 @@ decl_module! {
 			Proofs::<T>::insert(&claim, (sender.clone(), system::Module::<T>::block_number()));
 			Price::<T>::remove(&claim);
 
-			Self::deposit_event(RawEvent::ClaimSale(owner, sender, claim));
+			Self::deposit_event(RawEvent::ClaimSale(owner, sender, claim, bid_price));
 			Ok(())
 
 		}
