@@ -26,18 +26,6 @@ mod tests;
 
 pub const KEY_TYPE: KeyTypeId = KeyTypeId(*b"ocw8");
 
-/// The pallet's configuration trait.
-pub trait Trait: system::Trait + CreateSignedTransaction<Call<Self>> {
-	// Add other types and constants required to configure this pallet.
-
-	/// The identifier type for an offchain worker.
-	type AuthorityId: AppCrypto<Self::Public, Self::Signature>;
-	/// The overarching dispatch call type.
-	type Call: From<Call<Self>>;
-	/// The overarching event type.
-	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
-}
-
 pub mod crypto {
 	use crate::KEY_TYPE;
 	use sp_core::sr25519::Signature as Sr25519Signature;
@@ -65,6 +53,18 @@ pub mod crypto {
 		type GenericSignature = sp_core::sr25519::Signature;
 		type GenericPublic = sp_core::sr25519::Public;
 	}
+}
+
+/// The pallet's configuration trait.
+pub trait Trait: system::Trait + CreateSignedTransaction<Call<Self>> {
+	// Add other types and constants required to configure this pallet.
+
+	/// The identifier type for an offchain worker.
+	type AuthorityId: AppCrypto<Self::Public, Self::Signature>;
+	/// The overarching dispatch call type.
+	type Call: From<Call<Self>>;
+	/// The overarching event type.
+	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 }
 
 // This pallet's storage items.
